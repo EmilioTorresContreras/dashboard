@@ -1,10 +1,3 @@
-// app/page.tsx
-
-/**
- * Página principal de la aplicación.
- * Implementa un diseño moderno y atractivo con iconos, animaciones y mejor estructura.
- */
-
 import { Users, BookOpen, Building , Calendar } from "lucide-react";
 import Link from "next/link";
 
