@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 
 export default function EditarHorarioPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -24,6 +25,7 @@ export default function EditarHorarioPage({ params }: { params: Promise<{ id: st
     hora_inicio: "",
     hora_final: ""
   });
+  const setItems = useBreadcrumbStore(state => state.setItems)
   
   // Cargar datos del horario cuando estén disponibles
   useEffect(() => {
@@ -33,7 +35,13 @@ export default function EditarHorarioPage({ params }: { params: Promise<{ id: st
         hora_final: horario.hora_final
       });
     }
-  }, [horario]);
+    setItems([
+        { label: 'Escuela Limón', href: '/' },
+        { label: 'Horarios', href: '/horarios' },
+        { label: `${horario?.hora_inicio}`, href: `/horarios/${horario?._id}`},
+        { label: 'Editar', isCurrentPage: true },
+      ])
+  }, [horario, setItems]);
   
   if (horario === undefined) {
     return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { Id } from "../../../../convex/_generated/dataModel";
@@ -23,18 +23,28 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 
 export default function DetalleSalonPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const idSalon = id as Id<"salones">;
     const router = useRouter();
-    const estudiante = useQuery(api.salones.obtenerSalonPorId, { id: idSalon });
+    const salon = useQuery(api.salones.obtenerSalonPorId, { id: idSalon });
     const eliminarSalon = useMutation(api.salones.eliminarSalon);
 
     const [modalEliminar, setModalEliminar] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const setItems = useBreadcrumbStore(state => state.setItems)
 
-    if (estudiante === undefined) {
+    useEffect(() => {
+        setItems([
+            { label: 'Escuela Limón', href: '/' },
+            { label: 'Salones', href: '/salones' },
+            { label: `${salon?.numSalon}`, isCurrentPage: true },
+        ])
+    }, [setItems, salon])
+
+    if (salon === undefined) {
         return (
             <div className="container mx-auto py-10">
                 <div className="flex items-center gap-2 mb-6">
@@ -61,7 +71,7 @@ export default function DetalleSalonPage({ params }: { params: Promise<{ id: str
         );
     }
 
-    if (!estudiante) {
+    if (!salon) {
         return (
             <div className="container mx-auto py-10">
                 <div className="flex items-center gap-2 mb-6">
@@ -70,7 +80,7 @@ export default function DetalleSalonPage({ params }: { params: Promise<{ id: str
                     </Button>
                     <h1 className="text-3xl font-bold">Salon no encontrado</h1>
                 </div>
-                <p>No se pudo encontrar el estudiante con el ID proporcionado.</p>
+                <p>No se pudo encontrar el salon con el ID proporcionado.</p>
             </div>
         );
     }
@@ -82,10 +92,10 @@ export default function DetalleSalonPage({ params }: { params: Promise<{ id: str
     const handleEliminar = async () => {
         setIsSubmitting(true);
         try {
-            await eliminarSalon({ id: estudiante._id });
+            await eliminarSalon({ id: salon._id });
             router.push("/salones");
         } catch (error) {
-            console.error("Error al eliminar estudiante:", error);
+            console.error("Error al eliminar salon:", error);
         } finally {
             setIsSubmitting(false);
             setModalEliminar(false);
@@ -105,7 +115,7 @@ export default function DetalleSalonPage({ params }: { params: Promise<{ id: str
                 <CardHeader>
                     <div className="flex justify-between items-center">
                         <CardTitle className="text-2xl">
-                            {estudiante.edificio}
+                            {salon.edificio}
                         </CardTitle>
                         <div className="flex gap-2">
                             <Button
@@ -129,17 +139,17 @@ export default function DetalleSalonPage({ params }: { params: Promise<{ id: str
                 <CardContent className="space-y-6">
                     <div>
                         <h3 className="font-medium text-sm text-muted-foreground mb-1">Número de Matrícula</h3>
-                        <div className="p-2 bg-muted rounded-md">{estudiante.numSalon}</div>
+                        <div className="p-2 bg-muted rounded-md">{salon.numSalon}</div>
                     </div>
 
                     <div>
                         <h3 className="font-medium text-sm text-muted-foreground mb-1">Nombre Completo</h3>
-                        <div className="p-2 bg-muted rounded-md">{estudiante.edificio}</div>
+                        <div className="p-2 bg-muted rounded-md">{salon.edificio}</div>
                     </div>
 
                     <div>
                         <h3 className="font-medium text-sm text-muted-foreground mb-1">Correo Electrónico</h3>
-                        <div className="p-2 bg-muted rounded-md">{estudiante.planta}</div>
+                        <div className="p-2 bg-muted rounded-md">{salon.planta}</div>
                     </div>
                 </CardContent>
             </Card>
@@ -150,7 +160,7 @@ export default function DetalleSalonPage({ params }: { params: Promise<{ id: str
                     <DialogHeader>
                         <DialogTitle>¿Estás completamente seguro?</DialogTitle>
                         <DialogDescription>
-                            Esta acción no se puede deshacer. El estudiante será eliminado permanentemente
+                            Esta acción no se puede deshacer. El salon será eliminado permanentemente
                             de la base de datos.
                         </DialogDescription>
                     </DialogHeader>

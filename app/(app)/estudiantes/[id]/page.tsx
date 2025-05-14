@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Id } from "@/convex/_generated/dataModel";
@@ -23,6 +23,7 @@ import {
 } from "@/components/ui/dialog";
 import { ArrowLeft, Pencil, Trash2 } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 
 export default function DetalleEstudiantePage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -33,7 +34,15 @@ export default function DetalleEstudiantePage({ params }: { params: Promise<{ id
 
     const [modalEliminar, setModalEliminar] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const setItems = useBreadcrumbStore(state => state.setItems)
 
+    useEffect(() => {
+        setItems([
+            { label: 'Escuela Limón', href: '/' },
+            { label: 'Estudiantes', href: '/estudiantes' },
+            { label: `${estudiante?.numMatricula}`, isCurrentPage: true },
+        ])
+    }, [setItems, estudiante])
     if (estudiante === undefined) {
         return (
             <div className="container mx-auto py-10">

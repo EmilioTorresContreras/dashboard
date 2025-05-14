@@ -6,10 +6,21 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
+import { useEffect } from "react";
 
 export function TablaMaestros() {
   const router = useRouter();
   const maestros = useQuery(api.maestros.obtenerMaestros);
+
+  const setItems = useBreadcrumbStore(state => state.setItems)
+
+  useEffect(() => {
+        setItems([
+          { label: 'Escuela Limón', href: '/' },
+          { label: 'Maestros', href: '/maestros', isCurrentPage: true },
+        ])
+      }, [setItems])
 
   if (maestros === undefined) {
     return <div>Cargando maestros...</div>;
@@ -32,7 +43,7 @@ export function TablaMaestros() {
           Nuevo Maestro
         </Button>
       </div>
-      
+
       <Table>
         <TableCaption>Lista de maestros registrados</TableCaption>
         <TableHeader>
@@ -51,7 +62,7 @@ export function TablaMaestros() {
             </TableRow>
           ) : (
             maestros.map((maestro) => (
-              <TableRow 
+              <TableRow
                 key={maestro._id}
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() => handleVerMaestro(maestro._id)}

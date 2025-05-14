@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 
 export default function EditarEstudiantePage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -25,6 +26,7 @@ export default function EditarEstudiantePage({ params }: { params: Promise<{ id:
     nombre: "",
     correo: ""
   });
+  const setItems = useBreadcrumbStore(state => state.setItems)
   
   // Cargar datos del estudiante cuando estén disponibles
   useEffect(() => {
@@ -35,7 +37,13 @@ export default function EditarEstudiantePage({ params }: { params: Promise<{ id:
         correo: estudiante.correo
       });
     }
-  }, [estudiante]);
+    setItems([
+        { label: 'Escuela Limón', href: '/' },
+        { label: 'Estudiantes', href: '/estudiantes' },
+        { label: `${estudiante?.numMatricula}`, href: `/estudiantes/${estudiante?._id}`},
+        { label: 'Editar', isCurrentPage: true },
+      ])
+  }, [estudiante, setItems]);
   
   if (estudiante === undefined) {
     return (

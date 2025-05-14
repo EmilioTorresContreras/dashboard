@@ -1,6 +1,6 @@
 "use client";
 
-import { use, useState } from "react";
+import { use, useEffect, useState } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { useRouter } from "next/navigation";
 
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Skeleton } from "@/components/ui/skeleton";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Dialog, DialogContent, DialogDescription, DialogFooter, DialogHeader, DialogTitle } from "@/components/ui/dialog";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 
 export default function DetalleMaestroPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
@@ -22,6 +23,15 @@ export default function DetalleMaestroPage({ params }: { params: Promise<{ id: s
 
     const [modalEliminar, setModalEliminar] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const setItems = useBreadcrumbStore(state => state.setItems)
+
+    useEffect(() => {
+        setItems([
+            { label: 'Escuela Limón', href: '/' },
+            { label: 'Maestros', href: '/maestros' },
+            { label: `${maestro?.numEmpleado}`, isCurrentPage: true },
+        ])
+    }, [setItems, maestro])
 
     if (maestro === undefined) {
         return (

@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { useMutation } from "convex/react";
 import { api } from "../../../../convex/_generated/api";
 import { useRouter } from "next/navigation";
@@ -15,6 +15,7 @@ import {
     CardTitle,
 } from "@/components/ui/card";
 import { ArrowLeft } from "lucide-react";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 
 export default function CrearMateriaPage() {
     const router = useRouter();
@@ -26,6 +27,15 @@ export default function CrearMateriaPage() {
     });
 
     const [isSubmitting, setIsSubmitting] = useState(false);
+    const setItems = useBreadcrumbStore(state => state.setItems)
+
+    useEffect(() => {
+        setItems([
+            { label: 'Escuela Limón', href: '/' },
+            { label: 'Materias', href: '/materias' },
+            { label: 'Crear Materia', isCurrentPage: true },
+        ])
+    }, [setItems])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
         const { name, value } = e.target;

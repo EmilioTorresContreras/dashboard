@@ -6,10 +6,21 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
+import { useEffect } from "react";
 
 export function TablaEstudiantes() {
   const router = useRouter();
   const estudiantes = useQuery(api.estudiantes.obtenerEstudiantes);
+
+  const setItems = useBreadcrumbStore(state => state.setItems)
+
+    useEffect(() => {
+          setItems([
+            { label: 'Escuela Limón', href: '/' },
+            { label: 'Estudiantes', href: '/estudiantes', isCurrentPage: true },
+          ])
+        }, [setItems])
 
   if (estudiantes === undefined) {
     return <div>Cargando estudiantes...</div>;
@@ -32,7 +43,7 @@ export function TablaEstudiantes() {
           Nuevo Estudiante
         </Button>
       </div>
-      
+
       <Table>
         <TableCaption>Lista de estudiantes registrados</TableCaption>
         <TableHeader>
@@ -51,7 +62,7 @@ export function TablaEstudiantes() {
             </TableRow>
           ) : (
             estudiantes.map((estudiante) => (
-              <TableRow 
+              <TableRow
                 key={estudiante._id}
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() => handleVerEstudiante(estudiante._id)}

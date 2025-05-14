@@ -25,4 +25,12 @@ export default defineSchema({
     edificio: v.string(),
     planta: v.string(),
   }),
+  calificaciones: defineTable({
+    materia: v.string(),
+    nota: v.float64(),
+    semestre: v.string(),
+    estudianteId: v.id("estudiantes"),
+    createdAt: v.number(),
+    updatedAt: v.optional(v.number()),
+  }),
 });

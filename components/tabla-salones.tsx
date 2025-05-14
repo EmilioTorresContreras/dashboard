@@ -6,10 +6,20 @@ import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
 import { api } from "@/convex/_generated/api";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
+import { useEffect } from "react";
 
 export function TablaSalones() {
   const router = useRouter();
   const salones = useQuery(api.salones.obtenerSalones);
+  const setItems = useBreadcrumbStore(state => state.setItems)
+
+  useEffect(() => {
+    setItems([
+      { label: 'Escuela Limón', href: '/' },
+      { label: 'Salones', href: '/salones', isCurrentPage: true },
+    ])
+  }, [setItems])
 
   if (salones === undefined) {
     return <div>Cargando salones...</div>;
@@ -32,7 +42,7 @@ export function TablaSalones() {
           Nuevo Salón
         </Button>
       </div>
-      
+
       <Table>
         <TableCaption>Lista de salones registrados</TableCaption>
         <TableHeader>
@@ -51,7 +61,7 @@ export function TablaSalones() {
             </TableRow>
           ) : (
             salones.map((salon) => (
-              <TableRow 
+              <TableRow
                 key={salon._id}
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() => handleVerSalon(salon._id)}

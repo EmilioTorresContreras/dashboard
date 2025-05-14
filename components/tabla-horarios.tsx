@@ -6,10 +6,20 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
+import { useEffect } from "react";
 
 export function TablaHorarios() {
   const router = useRouter();
   const horarios = useQuery(api.horarios.obtenerHorarios);
+  const setItems = useBreadcrumbStore(state => state.setItems)
+
+  useEffect(() => {
+        setItems([
+          { label: 'Escuela Limón', href: '/' },
+          { label: 'Horarios', href: '/horarios', isCurrentPage: true },
+        ])
+      }, [setItems])
 
   if (horarios === undefined) {
     return <div>Cargando horarios...</div>;
@@ -32,7 +42,7 @@ export function TablaHorarios() {
           Nuevo Horario
         </Button>
       </div>
-      
+
       <Table>
         <TableCaption>Lista de horarios registrados</TableCaption>
         <TableHeader>
@@ -51,7 +61,7 @@ export function TablaHorarios() {
             </TableRow>
           ) : (
             horarios.map((horario) => (
-              <TableRow 
+              <TableRow
                 key={horario._id}
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() => handleVerHorario(horario._id)}

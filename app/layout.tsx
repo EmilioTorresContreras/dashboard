@@ -9,6 +9,7 @@ import {
   SidebarProvider,
 } from "@/components/ui/sidebar"
 import { ConvexClientProvider } from "./ConvexClientProvider";
+import { Toaster } from "@/components/ui/sonner";
 
 
 export const iframeHeight = "800px"
@@ -48,6 +49,7 @@ export default function RootLayout({ children }: RootLayoutProps): React.ReactEl
                   <ConvexClientProvider>
                     <div className="flex flex-1 flex-col gap-4 p-4">
                       {children}
+                      <Toaster />
                     </div>
                     <Footer />
                   </ConvexClientProvider>

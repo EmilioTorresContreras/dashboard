@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 
 export default function EditarMateriaPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -24,6 +25,7 @@ export default function EditarMateriaPage({ params }: { params: Promise<{ id: st
     identificador: "",
     nomMateria: ""
   });
+  const setItems = useBreadcrumbStore(state => state.setItems)
   
   // Cargar datos del materia cuando estén disponibles
   useEffect(() => {
@@ -33,8 +35,14 @@ export default function EditarMateriaPage({ params }: { params: Promise<{ id: st
         nomMateria: materia.nomMateria
       });
     }
-  }, [materia]);
-  
+    setItems([
+        { label: 'Escuela Limón', href: '/' },
+        { label: 'Materias', href: '/materias' },
+        { label: `${materia?.nomMateria}`, href: `/materias/${materia?._id}`},
+        { label: 'Editar', isCurrentPage: true },
+      ])
+  }, [ setItems, materia]);
+
   if (materia === undefined) {
     return (
       <div className="container mx-auto py-10">

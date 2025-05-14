@@ -6,10 +6,20 @@ import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, Tabl
 import { Button } from "./ui/button";
 import { Plus } from "lucide-react";
 import { useRouter } from "next/navigation";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
+import { useEffect } from "react";
 
 export function TablaMaterias() {
   const router = useRouter();
   const materias = useQuery(api.materias.obtenerMaterias);
+  const setItems = useBreadcrumbStore(state => state.setItems)
+
+  useEffect(() => {
+      setItems([
+        { label: 'Escuela Limón', href: '/' },
+        { label: 'Materias', href: '/materias', isCurrentPage: true },
+      ])
+    }, [setItems])
 
   if (materias === undefined) {
     return <div>Cargando materias...</div>;
@@ -32,7 +42,7 @@ export function TablaMaterias() {
           Nuevo Materia
         </Button>
       </div>
-      
+
       <Table>
         <TableCaption>Lista de materias registrados</TableCaption>
         <TableHeader>
@@ -51,7 +61,7 @@ export function TablaMaterias() {
             </TableRow>
           ) : (
             materias.map((materia) => (
-              <TableRow 
+              <TableRow
                 key={materia._id}
                 className="cursor-pointer hover:bg-muted/50"
                 onClick={() => handleVerMateria(materia._id)}

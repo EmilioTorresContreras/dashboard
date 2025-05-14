@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 
 export default function EditarSalonPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -18,14 +19,14 @@ export default function EditarSalonPage({ params }: { params: Promise<{ id: stri
   const router = useRouter();
   const salon = useQuery(api.salones.obtenerSalonPorId, { id: idSalon });
   const actualizarSalon = useMutation(api.salones.actualizarSalon);
-  
+
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [formData, setFormData] = useState({
     numSalon: "",
     edificio: "",
     planta: ""
   });
-  
+
   // Cargar datos del salon cuando estén disponibles
   useEffect(() => {
     if (salon) {
@@ -36,7 +37,18 @@ export default function EditarSalonPage({ params }: { params: Promise<{ id: stri
       });
     }
   }, [salon]);
-  
+
+  const setItems = useBreadcrumbStore(state => state.setItems)
+
+  useEffect(() => {
+    setItems([
+      { label: 'Escuela Limón', href: '/' },
+      { label: 'Salones', href: '/salones' },
+      { label: `${salon?.numSalon}`, href: `/salones/${salon?._id}`},
+      { label: 'Editar', isCurrentPage: true },
+    ])
+  }, [setItems, salon])
+
   if (salon === undefined) {
     return (
       <div className="container mx-auto py-10">
@@ -77,16 +89,16 @@ export default function EditarSalonPage({ params }: { params: Promise<{ id: stri
       </div>
     );
   }
-  
+
   const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const { name, value } = e.target;
     setFormData((prev) => ({ ...prev, [name]: value }));
   };
-  
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     setIsSubmitting(true);
-    
+
     try {
       await actualizarSalon({
         id: salon._id,
@@ -99,7 +111,7 @@ export default function EditarSalonPage({ params }: { params: Promise<{ id: stri
       setIsSubmitting(false);
     }
   };
-  
+
   return (
     <div className="container mx-auto py-10">
       <div className="flex items-center gap-2 mb-6">
@@ -108,7 +120,7 @@ export default function EditarSalonPage({ params }: { params: Promise<{ id: stri
         </Button>
         <h1 className="text-3xl font-bold">Editar Salón</h1>
       </div>
-      
+
       <Card className="max-w-2xl mx-auto">
         <form onSubmit={handleSubmit}>
           <CardHeader>
@@ -126,7 +138,7 @@ export default function EditarSalonPage({ params }: { params: Promise<{ id: stri
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="edificio">Edificio</Label>
               <Input
@@ -138,7 +150,7 @@ export default function EditarSalonPage({ params }: { params: Promise<{ id: stri
                 required
               />
             </div>
-            
+
             <div className="space-y-2">
               <Label htmlFor="planta">Planta</Label>
               <Input
@@ -150,18 +162,18 @@ export default function EditarSalonPage({ params }: { params: Promise<{ id: stri
               />
             </div>
           </CardContent>
-          
+
           <CardFooter className="flex justify-between">
-            <Button 
-              type="button" 
-              variant="outline" 
+            <Button
+              type="button"
+              variant="outline"
               onClick={() => router.back()}
               disabled={isSubmitting}
             >
               Cancelar
             </Button>
-            <Button 
-              type="submit" 
+            <Button
+              type="submit"
               disabled={isSubmitting}
               className="flex items-center gap-2 mt-8"
             >

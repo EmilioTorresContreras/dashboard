@@ -18,6 +18,8 @@ import {
   SidebarMenuSubButton,
   SidebarMenuSubItem,
 } from "@/components/ui/sidebar"
+import { useSidebarStore } from "@/app/stores/sidebarStore"
+import { usePathname } from "next/navigation"
 
 export function NavMain({
   items,
@@ -33,12 +35,31 @@ export function NavMain({
     }[]
   }[]
 }) {
+  const pathname = usePathname()
+  const { expandedSections, toggleSection, setSectionOpen } = useSidebarStore()
+
+  // useEffect(() => {
+  //   items.forEach(item => {
+  //     const hasMatch = item.items?.some(subItem => pathname.startsWith(subItem.url))
+  //     console.log(hasMatch)
+  //     console.log(pathname)
+  //     console.log(item.url)
+  //     if (hasMatch && !expandedSections[item.title]) {
+  //       setSectionOpen(item.title, true)
+  //     } 
+  //   })
+  // }, [pathname, items, expandedSections, setSectionOpen])
+  
   return (
     <SidebarGroup>
       <SidebarGroupLabel>Platform</SidebarGroupLabel>
       <SidebarMenu>
-        {items.map((item) => (
-          <Collapsible key={item.title} asChild defaultOpen={item.isActive}>
+        {items.map((item) => {
+        const isOpen = expandedSections[item.title] ?? item.isActive ?? false
+        const pathname = usePathname()
+          const isRouteActive = (route: string) => pathname.startsWith(route)
+        return (
+          <Collapsible key={item.title} asChild open={isRouteActive(item.url) || isOpen}>
             <SidebarMenuItem>
               <SidebarMenuButton asChild tooltip={item.title}>
                 <a href={item.url}>
@@ -49,8 +70,9 @@ export function NavMain({
               {item.items?.length ? (
                 <>
                   <CollapsibleTrigger asChild>
-                    <SidebarMenuAction className="data-[state=open]:rotate-90">
-                      <ChevronRight />
+                    <SidebarMenuAction  onClick={() => toggleSection(item.title)} className="data-[state=open]:rotate-90">
+                      <ChevronRight/>
+                      
                       <span className="sr-only">Toggle</span>
                     </SidebarMenuAction>
                   </CollapsibleTrigger>
@@ -71,8 +93,10 @@ export function NavMain({
               ) : null}
             </SidebarMenuItem>
           </Collapsible>
-        ))}
+        )})}
       </SidebarMenu>
     </SidebarGroup>
   )
 }
+
+

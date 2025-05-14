@@ -11,6 +11,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { ArrowLeft, Save } from "lucide-react";
 import { Skeleton } from "@/components/ui/skeleton";
+import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 
 export default function EditarMaestroPage({ params }: { params: Promise<{ id: string }> }) {
   const { id } = use(params);
@@ -25,6 +26,7 @@ export default function EditarMaestroPage({ params }: { params: Promise<{ id: st
     nombre: "",
     correo: ""
   });
+  const setItems = useBreadcrumbStore(state => state.setItems)
   
   // Cargar datos del maestro cuando estén disponibles
   useEffect(() => {
@@ -35,7 +37,13 @@ export default function EditarMaestroPage({ params }: { params: Promise<{ id: st
         correo: maestro.correo
       });
     }
-  }, [maestro]);
+    setItems([
+        { label: 'Escuela Limón', href: '/' },
+        { label: 'Maestros', href: '/maestros' },
+        { label: `${maestro?.numEmpleado}`, href: `/maestros/${maestro?._id}`},
+        { label: 'Editar', isCurrentPage: true },
+      ])
+  }, [maestro, setItems]);
   
   if (maestro === undefined) {
     return (
