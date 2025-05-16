@@ -8,9 +8,6 @@ import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-
-import { useForm } from "react-hook-form";
-import { zodResolver } from "@hookform/resolvers/zod";
 import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 import { Calificacion } from "@/types/calificacion";
 
@@ -21,7 +18,6 @@ import { AllCommunityModule, colorSchemeDarkBlue, colorSchemeLightCold, ModuleRe
 import { useTheme } from "next-themes";
 import DeleteButton from "./DeleteButton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
-import { CalificacionFormValues, calificacionSchema } from "@/app/shemas/calificacion";
 import { useRouter } from "next/navigation";
 import GetButton from "./GetButton";
 
@@ -37,21 +33,9 @@ export default function TableCalificaciones() {
     const estudiantes = useQuery(api.estudiantes.obtenerEstudiantes);
     const eliminarCalificacion = useMutation(api.calificaciones.eliminarCalificacion);
 
-    const form = useForm<CalificacionFormValues>({
-        resolver: zodResolver(calificacionSchema),
-        defaultValues: {
-            materia: "",
-            nota: 0,
-            semestre: "",
-            estudianteId: ""
-        }
-    });
-
     const [calificaciones, setCalificaciones] = useState<Calificacion[] | null>(null);
     const [isLoadingCalificaciones, setIsLoadingCalificaciones] = useState(true);
     const [errorCalificaciones, setErrorCalificaciones] = useState<Error | null>(null);
-
-    const [editingId, setEditingId] = useState<Id<"calificaciones"> | null>(null);
 
     useEffect(() => {
         async function cargarCalificaciones() {
@@ -76,22 +60,6 @@ export default function TableCalificaciones() {
         }
         cargarCalificaciones();
     }, [estudiantes]);
-
-    useEffect(() => {
-        if (editingId && calificaciones) {
-            const calificacion = calificaciones.find(c => c._id === editingId);
-            if (calificacion) {
-                form.reset({
-                    materia: calificacion.materia,
-                    nota: calificacion.nota,
-                    semestre: calificacion.semestre,
-                    estudianteId: calificacion.estudianteId
-                });
-            }
-        } else if (!editingId) {
-            form.reset();
-        }
-    }, [editingId, calificaciones, form]);
 
     const setItems = useBreadcrumbStore(state => state.setItems)
 
