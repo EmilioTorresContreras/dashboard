@@ -6,4 +6,7 @@ export interface Calificacion {
   estudianteId: string;
   createdAt: number;
   updatedAt?: number;
+  estudiante?: {
+    nombre: string;
+  } | null; // Campo opcional para el nombre del estudiante
 }

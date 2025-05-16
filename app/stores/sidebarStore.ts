@@ -4,7 +4,6 @@ import { persist } from "zustand/middleware"
 interface SidebarStore {
     expandedSections: Record<string, boolean>
     toggleSection: (key: string) => void
-    setSectionOpen: (key: string, value: boolean) => void
 }
 
 export const useSidebarStore = create(
@@ -17,14 +16,7 @@ export const useSidebarStore = create(
                         ...state.expandedSections,
                         [key]: !state.expandedSections[key],
                     },
-                })),
-            setSectionOpen: (key: string, isOpen: boolean) =>
-                set((state) => ({
-                    expandedSections: {
-                        ...state.expandedSections,
-                        [key]: isOpen,
-                    },
-                })),
+                }))
 
         }),
         {

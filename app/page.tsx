@@ -6,7 +6,6 @@ import { ChevronDown, GraduationCap, Book, Clock, Users, Mail, MapPin, Phone, Ar
 export default function Home() {
   const setItems = useBreadcrumbStore(state => state.setItems);
   const [scrolled, setScrolled] = useState(false);
-  const [activeSection, setActiveSection] = useState("inicio");
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
   const [subject, setSubject] = useState("");
@@ -23,16 +22,6 @@ export default function Home() {
       } else {
         setScrolled(false);
       }
-      
-      // Determine active section based on scroll position
-      const sections = document.querySelectorAll("section[id]");
-      sections.forEach(section => {
-        const sectionTop = (section as HTMLElement).offsetTop - 100;
-        const sectionHeight = (section as HTMLElement).offsetHeight;
-        if (window.scrollY >= sectionTop && window.scrollY < sectionTop + sectionHeight) {
-          setActiveSection(section.id);
-        }
-      });
     };
     
     window.addEventListener("scroll", handleScroll);

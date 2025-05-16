@@ -1,46 +1,42 @@
-// app/components/calificaciones/CalificacionesTablePage.tsx
 "use client";
 
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { fetchQuery } from "convex/nextjs";
 import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
-import { Input } from "@/components/ui/input";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
-import { z } from "zod";
+
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore";
 import { Calificacion } from "@/types/calificacion";
 
-// Zod schema para validar el formulario
-const calificacionSchema = z.object({
-    materia: z.string().min(1, { message: "La materia es requerida" }),
-    nota: z.coerce.number()
-        .min(0, { message: "La nota no puede ser menor a 0" })
-        .max(5, { message: "La nota no puede ser mayor a 5" }),
-    semestre: z.string().min(1, { message: "El semestre es requerido" }),
-    estudianteId: z.string().min(1, { message: "El estudiante es requerido" })
-});
+//Tabla Ag Grid
+import { AgGridReact } from 'ag-grid-react';
+import type { ColDef, ICellRendererParams, RowSelectionOptions } from 'ag-grid-community';
+import { AllCommunityModule, colorSchemeDarkBlue, colorSchemeLightCold, ModuleRegistry, themeQuartz } from 'ag-grid-community';
+import { useTheme } from "next-themes";
+import DeleteButton from "./DeleteButton";
+import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
+import { CalificacionFormValues, calificacionSchema } from "@/app/shemas/calificacion";
+import { useRouter } from "next/navigation";
+import GetButton from "./GetButton";
 
-type CalificacionFormValues = z.infer<typeof calificacionSchema>;
+ModuleRegistry.registerModules([
+    AllCommunityModule,
+]);
 
 export default function TableCalificaciones() {
+    const router = useRouter();
+    const [showConfirmDialog, setShowConfirmDialog] = useState(false);
+    const [rowToDelete, setRowToDelete] = useState<Calificacion | null>(null);
 
-    // Non-reactive fetch using Convex invoke (no real-time updates)
-    //const calificaciones = fetchQuery(api.calificaciones.obtenerCalificacionesConEstudiante);
     const estudiantes = useQuery(api.estudiantes.obtenerEstudiantes);
-
-    const crearCalificacion = useMutation(api.calificaciones.crearCalificacion);
-    const actualizarCalificacion = useMutation(api.calificaciones.actualizarCalificacion);
     const eliminarCalificacion = useMutation(api.calificaciones.eliminarCalificacion);
 
-    // Configurar formulario con react-hook-form y zod
     const form = useForm<CalificacionFormValues>({
         resolver: zodResolver(calificacionSchema),
         defaultValues: {
@@ -51,52 +47,37 @@ export default function TableCalificaciones() {
         }
     });
 
-    // Calificaciones sin tiempo real
     const [calificaciones, setCalificaciones] = useState<Calificacion[] | null>(null);
     const [isLoadingCalificaciones, setIsLoadingCalificaciones] = useState(true);
     const [errorCalificaciones, setErrorCalificaciones] = useState<Error | null>(null);
 
     const [editingId, setEditingId] = useState<Id<"calificaciones"> | null>(null);
-    // Cargar calificaciones de forma no reactiva al montar el componente
+
     useEffect(() => {
         async function cargarCalificaciones() {
             try {
                 setIsLoadingCalificaciones(true);
                 const data = await fetchQuery(api.calificaciones.obtenerCalificacionesConEstudiante);
-                setCalificaciones(data as Calificacion[]); // Asegúrate que el tipo es correcto
+                const calificacionesConEstudiante = data.map((calificacion) => ({
+                    ...calificacion,
+                    estudiante: {
+                        nombre: estudiantes?.find(e => e._id === calificacion.estudianteId)?.nombre || "Estudiante no encontrado",
+                    },
+                }));
+                setCalificaciones(calificacionesConEstudiante);
                 setErrorCalificaciones(null);
             } catch (err) {
                 console.error("Error fetching calificaciones:", err);
                 setErrorCalificaciones(err as Error);
-                setCalificaciones([]); // O maneja el error como prefieras
+                setCalificaciones([]);
             } finally {
                 setIsLoadingCalificaciones(false);
             }
         }
         cargarCalificaciones();
-    }, []); // El array vacío [] significa que solo se ejecuta al montar y desmontar
+    }, [estudiantes]);
 
-    // useEffect(() => {
-    //     const fetchCalificacion = async () => {
-    //         if (editingId && calificaciones) {
-    //             const calificacion = (await calificaciones).find(c => c._id === editingId);
-    //             if (calificacion) {
-    //                 form.reset({
-    //                     materia: calificacion.materia,
-    //                     nota: calificacion.nota,
-    //                     semestre: calificacion.semestre,
-    //                     estudianteId: calificacion.estudianteId
-    //                 });
-    //             }
-    //         }
-    //     };
-
-    //     fetchCalificacion();
-    // }, [editingId, calificaciones, form]);
-
-    // useEffect para resetear el form cuando 'editingId' cambia
     useEffect(() => {
-        // Solo proceder si 'calificaciones' ya se cargó y no es null
         if (editingId && calificaciones) {
             const calificacion = calificaciones.find(c => c._id === editingId);
             if (calificacion) {
@@ -104,14 +85,13 @@ export default function TableCalificaciones() {
                     materia: calificacion.materia,
                     nota: calificacion.nota,
                     semestre: calificacion.semestre,
-                    estudianteId: calificacion.estudianteId // Asegúrate que este es el ID y no el objeto estudiante
+                    estudianteId: calificacion.estudianteId
                 });
             }
-        } else if (!editingId) { // Si no hay editingId, resetea a valores por defecto
+        } else if (!editingId) {
             form.reset();
         }
-    }, [editingId, calificaciones, form]); // 'calificaciones' ahora es el estado
-
+    }, [editingId, calificaciones, form]);
 
     const setItems = useBreadcrumbStore(state => state.setItems)
 
@@ -122,56 +102,93 @@ export default function TableCalificaciones() {
         ])
     }, [setItems])
 
-    // Manejar envío del formulario
-    const onSubmit = async (values: CalificacionFormValues) => {
-        try {
-            if (editingId) {
-                // Actualizar calificación existente
-                await actualizarCalificacion({
-                    id: editingId,
-                    materia: values.materia,
-                    nota: values.nota,
-                    semestre: values.semestre
-                });
-                toast("Calificación actualizada", { description: "La calificación se ha actualizado correctamente" });
-            } else {
-                // Crear nueva calificación
-                await crearCalificacion({
-                    materia: values.materia,
-                    nota: values.nota,
-                    semestre: values.semestre,
-                    estudianteId: values.estudianteId as Id<"estudiantes">
-                });
-                toast("Calificación creada", { description: "La calificación se ha creado correctamente" });
-            }
-
-            // Limpiar formulario y estado de edición
-            form.reset();
-            setEditingId(null);
-        } catch (error) {
-            toast.error("Error", {
-                description: "Ocurrió un error al guardar la calificación"
-            });
-            console.error(error);
-        }
+    const handleVerCalificacion = (id: string) => {
+        router.push(`/calificaciones/${id}`);
     };
 
-    // Función para manejar la eliminación
     const handleDelete = async (id: Id<"calificaciones">) => {
         try {
             await eliminarCalificacion({ id });
-            toast.warning("Calificación eliminada", { description: "La calificación se ha eliminado correctamente" });
+            toast.success("Calificación eliminada", { description: "La calificación se ha eliminado correctamente" });
         } catch (error) {
             toast.error("Error", { description: "Ocurrió un error al eliminar la calificación" });
             console.error(error);
         }
     };
 
-    // Cancelar edición
-    const handleCancel = () => {
-        setEditingId(null);
-        form.reset();
-    };
+    const [columnDefs] = useState<ColDef[]>([
+        { field: 'materia', headerName: 'Materia', filter: 'agTextColumnFilter', editable: true, flex: 3 },
+        { field: 'nota', headerName: 'Nota', filter: 'agNumberColumnFilter', editable: true, flex: 2 },
+        { field: 'semestre', headerName: 'Semestre', flex: 2 },
+        {
+            headerName: 'Estudiante',
+            valueGetter: (params) => params.data.estudiante?.nombre || "Estudiante no encontrado", flex: 3
+        },
+        { field: 'createdAt', headerName: 'Creado', valueFormatter: (params) => new Date(params.value).toLocaleString(), flex: 2 },
+        //{ field: 'updatedAt', headerName: 'Actualizado', valueFormatter: (params) => params.value ? new Date(params.value).toLocaleString() : "No actualizado" },
+        {
+            headerName: 'Eliminar',
+            cellRenderer: DeleteButton,
+            cellRendererParams: {
+                onDeleteClick: (data: Calificacion) => {
+                    setRowToDelete(data);
+                    setShowConfirmDialog(true);
+                }
+            } as unknown as ICellRendererParams<Calificacion, unknown, unknown>,
+            sortable: false,
+            filter: false,
+            flex: 1
+        },
+        {
+            headerName: 'Visualizar',
+            cellRenderer: GetButton,
+            cellRendererParams: {
+                onGetClick: (data: Calificacion) => {
+                    handleVerCalificacion(data._id)
+                }
+            } as unknown as ICellRendererParams<Calificacion, unknown, unknown>,
+            sortable: false,
+            filter: false,
+            flex: 1
+        }
+    ]);
+
+    const performDelete = useCallback(async () => {
+        if (!rowToDelete) return;
+
+        try {
+            await eliminarCalificacion({ id: rowToDelete._id });
+            toast.success("Calificación eliminada", { description: "La calificación se ha eliminado correctamente" });
+        } catch (error) {
+            toast.error("Error", { description: "Ocurrió un error al eliminar la calificación" });
+            console.error(error);
+        }
+
+    }, [rowToDelete, eliminarCalificacion]);
+
+    const cancelDelete = useCallback(() => {
+        setShowConfirmDialog(false);
+        setRowToDelete(null);
+    }, []);
+
+    const rowSelection = useMemo(() => {
+        return {
+            mode: 'multiRow',
+        };
+    }, []);
+
+    const { theme } = useTheme();
+    const [themeTabla, setThemeTabla] = useState(themeQuartz.withPart(colorSchemeLightCold))
+
+    useEffect(() => {
+        if (theme === 'dark') {
+            setThemeTabla(themeQuartz.withPart(colorSchemeDarkBlue))
+        } else if (theme === 'light') {
+            setThemeTabla(themeQuartz.withPart(colorSchemeLightCold))
+        } else {
+            setThemeTabla(themeQuartz.withPart(colorSchemeDarkBlue))
+        }
+    }, [theme])
 
     if (isLoadingCalificaciones) {
         return <div className="container mx-auto py-8 text-center">Cargando calificaciones...</div>;
@@ -185,124 +202,6 @@ export default function TableCalificaciones() {
         <div className="container mx-auto py-8">
             <h1 className="text-2xl font-bold mb-6">Gestión de Calificaciones</h1>
 
-            {/* Formulario */}
-            <div className="bg-card p-6 rounded-lg shadow mb-8">
-                <h2 className="text-xl font-semibold mb-4">
-                    {editingId ? "Editar Calificación" : "Nueva Calificación"}
-                </h2>
-
-                <Form {...form}>
-                    <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
-                        <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <FormField
-                                control={form.control}
-                                name="materia"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Materia</FormLabel>
-                                        <FormControl>
-                                            <Input placeholder="Ej: Matemáticas" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="nota"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Nota</FormLabel>
-                                        <FormControl>
-                                            <Input type="number" step="0.1" min="0" max="5" {...field} />
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="semestre"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Semestre</FormLabel>
-                                        <FormControl>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
-                                                value={field.value}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Seleccionar semestre" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    <SelectItem value="2023-1">2023-1</SelectItem>
-                                                    <SelectItem value="2023-2">2023-2</SelectItem>
-                                                    <SelectItem value="2024-1">2024-1</SelectItem>
-                                                    <SelectItem value="2024-2">2024-2</SelectItem>
-                                                    <SelectItem value="2025-1">2025-1</SelectItem>
-                                                </SelectContent>
-                                            </Select>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-
-                            <FormField
-                                control={form.control}
-                                name="estudianteId"
-                                render={({ field }) => (
-                                    <FormItem>
-                                        <FormLabel>Estudiante</FormLabel>
-                                        <FormControl>
-                                            <Select
-                                                onValueChange={field.onChange}
-                                                defaultValue={field.value}
-                                                disabled={!!editingId} // No permitir cambiar estudiante al editar
-                                                value={field.value}
-                                            >
-                                                <SelectTrigger>
-                                                    <SelectValue placeholder="Seleccionar estudiante" />
-                                                </SelectTrigger>
-                                                <SelectContent>
-                                                    {(estudiantes)?.map(estudiante => (
-                                                        <SelectItem
-                                                            key={estudiante._id}
-                                                            value={estudiante._id}
-                                                        >
-                                                            {estudiante.nombre}
-                                                        </SelectItem>
-                                                    ))}
-                                                </SelectContent>
-                                            </Select>
-                                        </FormControl>
-                                        <FormMessage />
-                                    </FormItem>
-                                )}
-                            />
-                        </div>
-
-                        <div className="flex justify-end gap-2">
-                            {editingId && (
-                                <Button
-                                    type="button"
-                                    variant="outline"
-                                    onClick={handleCancel}
-                                >
-                                    Cancelar
-                                </Button>
-                            )}
-                            <Button type="submit">
-                                {editingId ? "Actualizar" : "Guardar"}
-                            </Button>
-                        </div>
-                    </form>
-                </Form>
-            </div>
-
             {/* Tabla de calificaciones */}
             <div className="bg-card rounded-lg shadow overflow-hidden">
                 <Table>
@@ -312,7 +211,7 @@ export default function TableCalificaciones() {
                             <TableHead>Materia</TableHead>
                             <TableHead>Nota</TableHead>
                             <TableHead>Semestre</TableHead>
-                            <TableHead className="text-right">Acciones</TableHead>
+                            <TableHead className="text-center">Acciones</TableHead>
                         </TableRow>
                     </TableHeader>
                     <TableBody>
@@ -324,24 +223,20 @@ export default function TableCalificaciones() {
                             </TableRow>
                         ) : (
                             (calificaciones).map((calificacion) => (
-                                <TableRow key={calificacion._id}>
+                                <TableRow key={calificacion._id}
+                                    className="cursor-pointer hover:bg-muted/50"
+                                    onClick={() => handleVerCalificacion(calificacion._id)}
+                                >
                                     <TableCell>
                                         {calificacion.estudianteId
-                                            ? `${calificacion.estudianteId}`
+                                            ? `${calificacion.estudiante?.nombre}`
                                             : "Estudiante no encontrado"}
                                     </TableCell>
                                     <TableCell>{calificacion.materia}</TableCell>
                                     <TableCell>{calificacion.nota.toFixed(1)}</TableCell>
                                     <TableCell>{calificacion.semestre}</TableCell>
                                     <TableCell className="text-right">
-                                        <div className="flex justify-end gap-2">
-                                            <Button
-                                                variant="outline"
-                                                size="sm"
-                                                onClick={() => setEditingId(calificacion._id)}
-                                            >
-                                                Editar
-                                            </Button>
+                                        <div className="flex justify-center">
                                             <Button
                                                 variant="destructive"
                                                 size="sm"
@@ -357,6 +252,36 @@ export default function TableCalificaciones() {
                     </TableBody>
                 </Table>
             </div>
+            <div className="py-5"></div>
+            <div style={{ width: '100%', height: '70vh' }}>
+                <AgGridReact
+                    theme={themeTabla}
+                    rowData={calificaciones || []} // Asegúrate de que no sea null
+                    columnDefs={columnDefs}
+                    //defaultColDef={defaultColDef}
+                    rowSelection={rowSelection as RowSelectionOptions}
+                    pagination={true}
+                    paginationPageSize={10}
+                    paginationPageSizeSelector={[10, 20, 50, 100]}
+                />
+            </div>
+            {/* Diálogo de Confirmación de Shadcn */}
+            <AlertDialog open={showConfirmDialog} onOpenChange={setShowConfirmDialog}>
+                <AlertDialogContent>
+                    <AlertDialogHeader>
+                        <AlertDialogTitle>¿Estás absolutamente seguro?</AlertDialogTitle>
+                        <AlertDialogDescription>
+                            Esta acción no se puede deshacer. Esto eliminará permanentemente
+                            la fila seleccionada: **{rowToDelete ? `${rowToDelete.estudiante?.nombre} | ${rowToDelete.materia} | ${rowToDelete.nota}` : ''}**.
+                        </AlertDialogDescription>
+                    </AlertDialogHeader>
+                    <AlertDialogFooter>
+                        <AlertDialogCancel onClick={cancelDelete}>Cancelar</AlertDialogCancel>
+                        {/* El botón de acción llama a performDelete */}
+                        <AlertDialogAction onClick={performDelete}>Continuar</AlertDialogAction>
+                    </AlertDialogFooter>
+                </AlertDialogContent>
+            </AlertDialog>
         </div>
     );
 }
