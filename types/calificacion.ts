@@ -1,5 +1,9 @@
+import { GenericId } from "convex/values";
+
+export type CalificacionesId = GenericId<"calificaciones">;
+
 export interface Calificacion {
-  _id: import("/home/app/dashboard/convex/_generated/dataModel").Id<"calificaciones">;
+  _id: CalificacionesId;
   materia: string;
   nota: number;
   semestre: string;
