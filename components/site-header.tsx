@@ -2,7 +2,7 @@
 
 import { SidebarIcon } from "lucide-react"
 
-import { SearchForm } from "@/components/search-form"
+//import { SearchForm } from "@/components/search-form"
 import {
   Breadcrumb,
   BreadcrumbItem,
@@ -16,14 +16,19 @@ import { Separator } from "@/components/ui/separator"
 import { useSidebar } from "@/components/ui/sidebar"
 import { ThemeToggle } from "./theme/theme-toggle"
 import { useBreadcrumbStore } from "@/app/stores/breadcrumbStore"
+import { useAuth } from "@clerk/nextjs"
+import UserProfileButton from "./user-profile-button"
+import AuthButtons from "./auth-button"
 
 export function SiteHeader() {
+  const { isSignedIn } = useAuth();
   const { toggleSidebar } = useSidebar()
   const items = useBreadcrumbStore(state => state.items)
 
   return (
     <header className="bg-background sticky top-0 z-50 flex w-full items-center border-b">
       <div className="flex h-(--header-height) w-full items-center gap-2 px-4">
+        {isSignedIn ? 
         <Button
           className="h-8 w-8"
           variant="ghost"
@@ -31,9 +36,10 @@ export function SiteHeader() {
           onClick={toggleSidebar}
         >
           <SidebarIcon />
-        </Button>
+        </Button> : null}
+
         <Separator orientation="vertical" className="mr-2 h-4" />
-        <Breadcrumb className="hidden sm:block">
+        <Breadcrumb className="block">
           <BreadcrumbList>
             {items.map((item, index) => (
               <BreadcrumbItem key={index}>
@@ -51,10 +57,11 @@ export function SiteHeader() {
             ))}
           </BreadcrumbList>
         </Breadcrumb>
-        <div className="justify-end flex-1 sm:flex ">
+        <div className="flex flex-1 justify-end items-center gap-2">
+          {isSignedIn ? <UserProfileButton /> : <AuthButtons />}
           <ThemeToggle />
         </div>
-        <SearchForm className="w-full sm:ml-auto sm:w-auto" />
+        {/* <SearchForm className="w-full sm:ml-auto sm:w-auto" /> */}
       </div>
     </header>
   )

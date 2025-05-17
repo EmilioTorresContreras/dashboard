@@ -23,6 +23,7 @@ import { usePathname } from "next/navigation"
 
 export function NavMain({
   items,
+  title,
 }: {
   items: {
     title: string
@@ -34,15 +35,15 @@ export function NavMain({
       url: string
     }[]
   }[]
+  title?: string
 }) {
   const { expandedSections, toggleSection } = useSidebarStore()
   const pathname = usePathname()
 
   return (
     <SidebarGroup>
-      <SidebarGroupLabel>Platform</SidebarGroupLabel>
+      <SidebarGroupLabel>{title}</SidebarGroupLabel>
       <SidebarMenu>
-        
         {items.map((item) => {
           const isOpen = expandedSections[item.title] ?? item.isActive ?? false
 
@@ -61,7 +62,6 @@ export function NavMain({
                     <CollapsibleTrigger asChild>
                       <SidebarMenuAction onClick={() => toggleSection(item.title)} className="data-[state=open]:rotate-90">
                         <ChevronRight />
-
                         <span className="sr-only">Toggle</span>
                       </SidebarMenuAction>
                     </CollapsibleTrigger>

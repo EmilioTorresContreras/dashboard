@@ -11,6 +11,7 @@ import {
   Send,
   Citrus,
   BookOpenCheck,
+  UserCog,
 } from "lucide-react"
 
 import { NavMain } from "@/components/nav-main"
@@ -28,16 +29,22 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import { Button } from "./ui/button"
+import { useAuth, useUser } from "@clerk/nextjs"
+import AuthButtons from "./auth-button"
 
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
-  
+  const { isSignedIn} = useAuth()
+  const {user} = useUser()
   const data = {
     user: {
-      name: "shadcn",
-      email: "m@example.com",
-      avatar: "/avatars/shadcn.jpg",
+      fullName: user?.fullName || "Anónimo",
+      primaryEmailAddress: user?.primaryEmailAddress
+        ? { emailAddress: user.primaryEmailAddress.emailAddress }
+        : null,
+      imageUrl: user?.imageUrl || "",
+      rol: typeof user?.publicMetadata.rol === "string" ? user.publicMetadata.rol : ""
     },
     navMain: [
       {
@@ -132,6 +139,23 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       },
 
     ],
+    navAdmin: [
+      {
+        title: "Usuarios",
+        url: "/usuarios",
+        icon: UserCog,
+        items: [
+          {
+            title: "Ver",
+            url: "/usuarios",
+          },
+          {
+            title: "Crear",
+            url: "/usuarios/create",
+          },
+        ],
+      },
+    ],
     navSecondary: [
       {
         title: "Support",
@@ -185,12 +209,15 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
         </SidebarMenu>
       </SidebarHeader>
       <SidebarContent>
-        <NavMain items={data.navMain} />
+        <NavMain items={data.navMain} title="General" />
+        <NavMain items={data.navAdmin} title="Administración" />
         {/* <NavProjects projects={data.projects} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
-        <NavUser user={data.user} />
+        <div className="flex h-full items-center justify-start pl-2 pb-2">
+          {isSignedIn ? <NavUser user={data.user} />: <AuthButtons />}
+        </div>
       </SidebarFooter>
     </Sidebar>
   )

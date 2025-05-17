@@ -1,10 +1,9 @@
 "use client";
 
-import { useState, useEffect, useMemo, useCallback } from "react";
+import { useState, useEffect, useCallback } from "react";
 import { useQuery, useMutation } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { fetchQuery } from "convex/nextjs";
-import { Id } from "@/convex/_generated/dataModel";
 import { Button } from "@/components/ui/button";
 import { Table, TableBody, TableCell, TableHead, TableHeader, TableRow } from "@/components/ui/table";
 import { toast } from "sonner";
@@ -13,13 +12,14 @@ import { Calificacion } from "@/types/calificacion";
 
 //Tabla Ag Grid
 import { AgGridReact } from 'ag-grid-react';
-import type { ColDef, ICellRendererParams, RowSelectionOptions } from 'ag-grid-community';
+import type { ColDef, ICellRendererParams } from 'ag-grid-community';
 import { AllCommunityModule, colorSchemeDarkBlue, colorSchemeLightCold, ModuleRegistry, themeQuartz } from 'ag-grid-community';
 import { useTheme } from "next-themes";
 import DeleteButton from "./DeleteButton";
 import { AlertDialog, AlertDialogAction, AlertDialogCancel, AlertDialogContent, AlertDialogDescription, AlertDialogFooter, AlertDialogHeader, AlertDialogTitle } from "./ui/alert-dialog";
 import { useRouter } from "next/navigation";
 import GetButton from "./GetButton";
+import { Trash } from "lucide-react";
 
 ModuleRegistry.registerModules([
     AllCommunityModule,
@@ -74,16 +74,6 @@ export default function TableCalificaciones() {
         router.push(`/calificaciones/${id}`);
     };
 
-    const handleDelete = async (id: Id<"calificaciones">) => {
-        try {
-            await eliminarCalificacion({ id });
-            toast.success("Calificación eliminada", { description: "La calificación se ha eliminado correctamente" });
-        } catch (error) {
-            toast.error("Error", { description: "Ocurrió un error al eliminar la calificación" });
-            console.error(error);
-        }
-    };
-
     const [columnDefs] = useState<ColDef[]>([
         { field: 'materia', headerName: 'Materia', filter: 'agTextColumnFilter', editable: true, flex: 3 },
         { field: 'nota', headerName: 'Nota', filter: 'agNumberColumnFilter', editable: true, flex: 2 },
@@ -92,7 +82,7 @@ export default function TableCalificaciones() {
             headerName: 'Estudiante',
             valueGetter: (params) => params.data.estudiante?.nombre || "Estudiante no encontrado", flex: 3
         },
-        { field: 'createdAt', headerName: 'Creado', valueFormatter: (params) => new Date(params.value).toLocaleString(), flex: 2 },
+        //{ field: 'createdAt', headerName: 'Creado', valueFormatter: (params) => new Date(params.value).toLocaleString(), flex: 2 },
         //{ field: 'updatedAt', headerName: 'Actualizado', valueFormatter: (params) => params.value ? new Date(params.value).toLocaleString() : "No actualizado" },
         {
             headerName: 'Eliminar',
@@ -137,12 +127,6 @@ export default function TableCalificaciones() {
     const cancelDelete = useCallback(() => {
         setShowConfirmDialog(false);
         setRowToDelete(null);
-    }, []);
-
-    const rowSelection = useMemo(() => {
-        return {
-            mode: 'multiRow',
-        };
     }, []);
 
     const { theme } = useTheme();
@@ -191,11 +175,10 @@ export default function TableCalificaciones() {
                             </TableRow>
                         ) : (
                             (calificaciones).map((calificacion) => (
-                                <TableRow key={calificacion._id}
-                                    className="cursor-pointer hover:bg-muted/50"
-                                    onClick={() => handleVerCalificacion(calificacion._id)}
-                                >
-                                    <TableCell>
+                                <TableRow key={calificacion._id}>
+                                    <TableCell
+                                        className="cursor-pointer hover:bg-muted/50"
+                                        onClick={() => handleVerCalificacion(calificacion._id)}>
                                         {calificacion.estudianteId
                                             ? `${calificacion.estudiante?.nombre}`
                                             : "Estudiante no encontrado"}
@@ -207,10 +190,14 @@ export default function TableCalificaciones() {
                                         <div className="flex justify-center">
                                             <Button
                                                 variant="destructive"
+                                                className="cursor-pointer hover:bg-black"
                                                 size="sm"
-                                                onClick={() => handleDelete(calificacion._id)}
+                                                onClick={() => {
+                                                    setRowToDelete(calificacion)
+                                                    setShowConfirmDialog(true)
+                                                }}
                                             >
-                                                Eliminar
+                                                <Trash/>
                                             </Button>
                                         </div>
                                     </TableCell>
@@ -227,7 +214,7 @@ export default function TableCalificaciones() {
                     rowData={calificaciones || []} // Asegúrate de que no sea null
                     columnDefs={columnDefs}
                     //defaultColDef={defaultColDef}
-                    rowSelection={rowSelection as RowSelectionOptions}
+                    //rowSelection={rowSelection as RowSelectionOptions}
                     pagination={true}
                     paginationPageSize={10}
                     paginationPageSizeSelector={[10, 20, 50, 100]}

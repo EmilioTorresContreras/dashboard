@@ -169,7 +169,7 @@ export default function EditarCalificacionPage({ params }: { params: Promise<{ i
                                                     type="number"
                                                     step="0.1"
                                                     min="0"
-                                                    max="5"
+                                                    max="10"
                                                     {...field}
                                                     onChange={(e) => field.onChange(Number(e.target.value))}
                                                 />

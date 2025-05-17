@@ -80,7 +80,7 @@ export default function CrearCalificacionPage() {
 
             <Card className="w-full max-w-2xl mx-auto">
                 <CardHeader>
-                    <CardTitle className="font-semibold text-center">Información la calificación</CardTitle>
+                    <CardTitle className="font-semibold text-center">Información la Calificación</CardTitle>
                 </CardHeader>
                 <Form {...form}>
                     <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-4">
@@ -108,7 +108,7 @@ export default function CrearCalificacionPage() {
                                         <FormItem>
                                             <FormLabel>Nota</FormLabel>
                                             <FormControl>
-                                                <Input type="number" step="0.1" min="0" max="5" {...field} />
+                                                <Input type="number" step="0.1" min="0" max="10" {...field} />
                                             </FormControl>
                                             <FormMessage />
                                         </FormItem>

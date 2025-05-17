@@ -2,14 +2,7 @@ import { ThemeProvider } from "@/components/theme/theme-provider"
 import type { Metadata } from "next";
 import "./globals.css";
 import { Footer } from "@/components/layout/footer";
-import { AppSidebar } from "@/components/app-sidebar"
-import { SiteHeader } from "@/components/site-header"
-import {
-  SidebarInset,
-  SidebarProvider,
-} from "@/components/ui/sidebar"
-import { ConvexClientProvider } from "./ConvexClientProvider";
-import { Toaster } from "@/components/ui/sonner";
+import { Providers } from "./providers";
 
 
 export const iframeHeight = "800px"
@@ -18,7 +11,7 @@ export const description = "A sidebar with a header and a search form."
 
 export const metadata: Metadata = {
   title: "Escuela Limón",
-  description: "WebApp para gestionar mi escuela",
+  description: "Sistema para gestionar una escuela",
   icons: {
     icon: "/favicon.ico",
   },
@@ -27,7 +20,6 @@ export const metadata: Metadata = {
 type RootLayoutProps = Readonly<{
   children: React.ReactNode;
 }>;
-
 
 export default function RootLayout({ children }: RootLayoutProps): React.ReactElement {
   return (
@@ -40,24 +32,10 @@ export default function RootLayout({ children }: RootLayoutProps): React.ReactEl
           enableSystem
           disableTransitionOnChange
         >
-          <div className="[--header-height:calc(--spacing(14))]">
-            <SidebarProvider className="flex flex-col">
-              <SiteHeader />
-              <div className="flex flex-1">
-                <AppSidebar />
-                <SidebarInset>
-                  <ConvexClientProvider>
-                    <div className="flex flex-1 flex-col gap-4 p-4">
-                      {children}
-                      <Toaster />
-                    </div>
-                    <Footer />
-                  </ConvexClientProvider>
-
-                </SidebarInset>
-              </div>
-            </SidebarProvider>
-          </div>
+          <Providers>
+            {children}
+            <Footer />
+          </Providers>
         </ThemeProvider>
       </body>
     </html>

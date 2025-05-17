@@ -99,7 +99,7 @@ export default function Home() {
             </button>
           </div>
           
-          <div className=" animate-bounce absolute top-110 left-1/2 transform -translate-x-1/2">
+          <div className=" animate-bounce absolute top-130 sm:top-110 left-1/2 transform -translate-x-1/2">
             <ChevronDown 
               className="h-8 w-8 text-white opacity-70 cursor-pointer" 
               onClick={() => scrollToSection("nosotros")}

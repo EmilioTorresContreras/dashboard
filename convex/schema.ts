@@ -33,4 +33,17 @@ export default defineSchema({
     createdAt: v.number(),
     updatedAt: v.optional(v.number()),
   }),
+  usuarios: defineTable({
+    nombre: v.string(),
+    apellido: v.string(),
+    email: v.string(),
+    clerkId: v.string(),
+    rol: v.string(),
+    activo: v.boolean(),
+    fechaCreacion: v.number(),
+    fechaActualizacion: v.optional(v.number()),
+    metadata: v.optional(v.object({})), 
+  })
+  .index("por_email", ["email"])
+  .index("por_clerkId", ["clerkId"])
 });
