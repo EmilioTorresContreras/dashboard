@@ -3,8 +3,6 @@
 import { ConvexProvider, ConvexReactClient } from "convex/react";
 import { ReactNode } from "react";
 import { ClerkProvider } from '@clerk/nextjs';
-import { neobrutalism } from "@clerk/themes";
-import { esMX } from "@clerk/localizations";
 import { SidebarProvider } from "@/components/ui/sidebar";
 import { SiteHeader } from "@/components/site-header";
 import { ProviderAuthContent } from "./provider-auth-content";
@@ -15,15 +13,7 @@ export function Providers({ children }: { children: ReactNode }) {
   return (
     <div className="[--header-height:calc(--spacing(14))]">
       <SidebarProvider className="flex flex-col">
-        <ClerkProvider
-          localization={esMX}
-          appearance={{
-            baseTheme: neobrutalism,
-            layout: {
-              socialButtonsPlacement: 'bottom',
-              logoPlacement: 'inside',
-            },
-          }}>
+        <ClerkProvider>
           <ConvexProvider client={convex}>
             <SiteHeader />
             <ProviderAuthContent>

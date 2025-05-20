@@ -34,7 +34,7 @@ export function Footer(): React.ReactElement {
                 Calendario
               </Link>
               <Link href="/programas" className="transition hover:text-foreground">
-                Programsa
+                Programas
               </Link>
             </nav>
           </div>

@@ -25,7 +25,7 @@ ModuleRegistry.registerModules([
     AllCommunityModule,
 ]);
 
-export default function TableCalificaciones() {
+export default function TablaCalificaciones() {
     const router = useRouter();
     const [showConfirmDialog, setShowConfirmDialog] = useState(false);
     const [rowToDelete, setRowToDelete] = useState<Calificacion | null>(null);

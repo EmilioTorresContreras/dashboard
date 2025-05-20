@@ -1,11 +1,41 @@
-export default function AuthLayout({
-    children,
-  }: {
-    children: React.ReactNode;
-  }) {
-    return (
-      <div className="min-h-screen bg-gradient-to-br from-blue-50 to-gray-100">
-        {children} 
-      </div>
-    );
-  }
+import { ThemeProvider } from "@/components/theme/theme-provider"
+import type { Metadata } from "next";
+import "../../globals.css";
+import { ProviderSignInUp } from "./provider-auth-content";
+
+
+export const iframeHeight = "800px"
+
+export const description = "A sidebar with a header and a search form."
+
+export const metadata: Metadata = {
+  title: "Escuela Limón",
+  description: "Sistema para gestionar una escuela",
+  icons: {
+    icon: "/favicon.ico",
+  },
+};
+
+type RootLayoutProps = Readonly<{
+  children: React.ReactNode;
+}>;
+
+export default function RootLayout({ children }: RootLayoutProps): React.ReactElement {
+  return (
+    <html lang="en" suppressHydrationWarning>
+      <head />
+      <body className="min-h-screen bg-background font-sans antialiased">
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
+          <ProviderSignInUp>
+            {children}
+          </ProviderSignInUp>
+        </ThemeProvider>
+      </body>
+    </html>
+  );
+}

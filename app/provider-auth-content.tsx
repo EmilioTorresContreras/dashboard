@@ -16,7 +16,7 @@ export function ProviderAuthContent({ children }: { children: ReactNode }) {
 
                     <div className="flex flex-1 flex-col gap-4 p-4">
                         {children}
-                        <Toaster />
+                        <Toaster richColors/>
                     </div>
                 </SidebarInset>
             </div>
@@ -26,7 +26,7 @@ export function ProviderAuthContent({ children }: { children: ReactNode }) {
         <div>
             <div className="flex flex-1 flex-col gap-4 p-4">
                 {children}
-                <Toaster />
+                <Toaster richColors/>
             </div>
         </div>)
     }
