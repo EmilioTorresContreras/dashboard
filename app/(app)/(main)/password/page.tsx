@@ -14,7 +14,7 @@ import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
 
-export const passwordSchema = z.object({
+const passwordSchema = z.object({
     password: z
         .string()
         .min(8, { message: "La contraseña debe tener al menos 8 caracteres" })
@@ -28,7 +28,7 @@ export const passwordSchema = z.object({
     path: ["confirmPassword"],
 });
 
-export type PasswordFormValues = z.infer<typeof passwordSchema>;
+type PasswordFormValues = z.infer<typeof passwordSchema>;
 
 export default function PasswordPage() {
     const searchParams = useSearchParams();
