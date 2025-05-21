@@ -22,7 +22,7 @@ export async function POST(req: Request) {
 
     const link = `${baseUrl}/password?token=${token}`;
 
-    const result = await resend.emails.send({
+    await resend.emails.send({
       from: 'onboarding@resend.dev',
       to: body.email,
       subject: "Bienvenido a Nuestra Plataforma",
