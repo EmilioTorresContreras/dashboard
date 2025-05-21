@@ -4,11 +4,6 @@ import "../../globals.css";
 import { Footer } from "@/components/layout/footer";
 import { Providers } from "../../providers";
 
-
-export const iframeHeight = "800px"
-
-export const description = "A sidebar with a header and a search form."
-
 export const metadata: Metadata = {
   title: "Escuela Limón",
   description: "Sistema para gestionar una escuela",

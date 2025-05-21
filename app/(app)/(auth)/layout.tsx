@@ -3,11 +3,6 @@ import type { Metadata } from "next";
 import "../../globals.css";
 import { ProviderSignInUp } from "./provider-auth-content";
 
-
-export const iframeHeight = "800px"
-
-export const description = "A sidebar with a header and a search form."
-
 export const metadata: Metadata = {
   title: "Escuela Limón",
   description: "Sistema para gestionar una escuela",
