@@ -7,7 +7,7 @@ import { useAction } from "convex/react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { UserFormValues, userSchema } from "@/app/shemas/user";
+import { UsuarioFormValues, usuarioSchema } from "@/app/shemas/usuario";
 import { Card, CardContent, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from "@/components/ui/form";
 import { useEffect, useState } from "react";
@@ -16,8 +16,8 @@ import { toast } from "sonner";
 
 export default function UserCreateForm() {
 
-  const form = useForm<UserFormValues>({
-    resolver: zodResolver(userSchema),
+  const form = useForm<UsuarioFormValues>({
+    resolver: zodResolver(usuarioSchema),
     defaultValues: {
       nombre: "",
       apellido: "",
@@ -40,7 +40,7 @@ export default function UserCreateForm() {
     ])
   }, [setItems])
 
-  const onSubmit = async (data: UserFormValues) => {
+  const onSubmit = async (data: UsuarioFormValues) => {
     try {
       setIsSubmitting(true);
       const result = await createUser({
@@ -52,7 +52,22 @@ export default function UserCreateForm() {
         metadata: {}
       });
       if (result.success) {
-        toast.success(result.message);
+        try {
+          await fetch("/api/enviar-correo", {
+            method: "POST",
+            headers: { "Content-Type": "application/json" },
+            body: JSON.stringify({
+              nombre: data.nombre,
+              apellido: data.apellido,
+              email: data.email,
+              rol: data.rol,
+              id: result.userId
+            }),
+          });
+          toast.success("Correo enviado exitosamente");
+        } catch (emailError) {
+          console.error("Error al enviar el correo:", emailError);
+        }
       } else {
         toast.error(result.error);
       }

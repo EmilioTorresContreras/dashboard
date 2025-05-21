@@ -28,7 +28,6 @@ export default function EditarMaestroPage({ params }: { params: Promise<{ id: st
   });
   const setItems = useBreadcrumbStore(state => state.setItems)
   
-  // Cargar datos del maestro cuando estén disponibles
   useEffect(() => {
     if (maestro) {
       setFormData({

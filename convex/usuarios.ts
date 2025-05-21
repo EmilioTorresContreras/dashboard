@@ -49,3 +49,20 @@ export const obtenerUsuarioPorId = query({
     return await ctx.db.get(args.id);
   },
 });
+
+export const actualizarUsuario = mutation({
+  args: v.object({
+    usuarioId: v.id("usuarios"),
+    nuevosDatos: v.object({
+      nombre: v.string(),
+      apellido: v.string(),
+      email: v.string(),
+      rol: v.string(),
+      activo: v.boolean(),
+      metadata: v.optional(v.object({})),
+    }),
+  }),
+  handler: async (ctx, args) => {
+    await ctx.db.patch(args.usuarioId, args.nuevosDatos);
+  },
+});

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMutation, useQuery } from "convex/react";
+import { useAction, useMutation, useQuery } from "convex/react";
 import { api } from "@/convex/_generated/api";
 import { Table, TableBody, TableCaption, TableCell, TableHead, TableHeader, TableRow } from "./ui/table";
 import { Button } from "./ui/button";
@@ -17,7 +17,7 @@ export function TablaUsuarios() {
   const usuarios = useQuery(api.usuarios.obtenerUsuarios);
   const setItems = useBreadcrumbStore(state => state.setItems)
 
-  const eliminarUsuario = useMutation(api.usuarios.eliminarUsuario);
+  const eliminarUsuario = useAction(api["usersActions"].eliminarUsuario);
   const actualizarEstadoUsuario = useMutation(api.usuarios.actualizarEstadoUsuario);
 
   const [showDialog, setShowDialog] = useState(false)
@@ -70,7 +70,7 @@ export function TablaUsuarios() {
     if (!usuario) return;
     setOnConfirmAction(() => async () => {
       try {
-        await eliminarUsuario({ usuarioId: usuario._id });
+        await eliminarUsuario({ usuarioId: usuario._id, clerkId: usuario.clerkId });
         toast.success("Usuario eliminado exitosamente");
       } catch (error) {
         toast.error("Error", { description: `Ocurrió un error al eliminar el usuario. ${error}` });
