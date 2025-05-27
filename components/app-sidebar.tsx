@@ -29,23 +29,16 @@ import {
 } from "@/components/ui/sidebar"
 import Link from "next/link"
 import { Button } from "./ui/button"
-import { useAuth, useUser } from "@clerk/nextjs"
+import { useAuth } from "@clerk/nextjs"
 import AuthButtons from "./auth-button"
+import { useUserStore } from "@/app/stores/usuarioStore"
 
 
 
 export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
+  const role  = useUserStore((state) => state.role);
   const { isSignedIn} = useAuth()
-  const {user} = useUser()
   const data = {
-    user: {
-      fullName: user?.fullName || "Anónimo",
-      primaryEmailAddress: user?.primaryEmailAddress
-        ? { emailAddress: user.primaryEmailAddress.emailAddress }
-        : null,
-      imageUrl: user?.imageUrl || "",
-      rol: typeof user?.publicMetadata.rol === "string" ? user.publicMetadata.rol : ""
-    },
     navMain: [
       {
         title: "Maestros",
@@ -210,13 +203,14 @@ export function AppSidebar({ ...props }: React.ComponentProps<typeof Sidebar>) {
       </SidebarHeader>
       <SidebarContent>
         <NavMain items={data.navMain} title="General" />
-        <NavMain items={data.navAdmin} title="Administración" />
+        { role === "admin" ? <NavMain items={data.navAdmin} title="Administración" /> : null}
+        
         {/* <NavProjects projects={data.projects} /> */}
         <NavSecondary items={data.navSecondary} className="mt-auto" />
       </SidebarContent>
       <SidebarFooter>
         <div className="flex h-full items-center justify-start pl-2 pb-2">
-          {isSignedIn ? <NavUser user={data.user} />: <AuthButtons />}
+          {isSignedIn ? <NavUser/>: <AuthButtons />}
         </div>
       </SidebarFooter>
     </Sidebar>

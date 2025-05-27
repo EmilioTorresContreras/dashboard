@@ -16,12 +16,15 @@ import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useForm } from "react-hook-form";
 import { UsuarioFormEditValues, usuarioEditSchema } from "@/app/shemas/usuario";
+import { useUserStore } from "@/app/stores/usuarioStore";
 
 export default function EditarUsuarioPage({ params }: { params: Promise<{ id: string }> }) {
     const { id } = use(params);
     const idUsuario = id as Id<"usuarios">;
     const router = useRouter();
     const usuario = useQuery(api.usuarios.obtenerUsuarioPorId, { id: idUsuario });
+    const updateUserZ = useUserStore((state) => state.updateUser);
+
 
     const [isLoadingUsuario, setIsLoadingUsuario] = useState(true);
     const [errorUsuario, setErrorUsuario] = useState<Error | null>(null);
@@ -72,23 +75,25 @@ export default function EditarUsuarioPage({ params }: { params: Promise<{ id: st
                     nuevosDatosConvex: {
                         nombre: values.nombre,
                         apellido: values.apellido,
-                        email: values.email,
+                        email: usuario.email,
                         rol: values.rol,
                         activo: values.activo ? true : false
                     },
                     nuevosDatosClerk: {
                         firstName: values.nombre,
                         lastName: values.apellido,
-                        emailAddress: values.email,
+                        emailAddress: usuario.email,
                         rol: values.rol
                     }
                 });
                 if (result.success) {
+                    {updateUserZ({ name: `${values.nombre} ${values.apellido} `, role: values.rol });}
                     toast.success(result.message);
+                    router.push("/usuarios");
+
                 } else {
                     toast.error(result.error);
                 }
-                //router.push("/usuarios");
             }
 
         } catch (error) {
@@ -161,6 +166,7 @@ export default function EditarUsuarioPage({ params }: { params: Promise<{ id: st
                                 <FormField
                                     control={form.control}
                                     name="email"
+                                    disabled={true}
                                     render={({ field }) => (
                                         <FormItem>
                                             <FormLabel>Email</FormLabel>

@@ -32,24 +32,16 @@ import {
 import { useClerk } from "@clerk/nextjs"
 import { CambiarCorreoModal } from "./dialogues/correo-dialog"
 import { useState } from "react"
+import { useUserStore } from "@/app/stores/usuarioStore"
 
-export function NavUser({
-  user,
-}: {
-  user: {
-    fullName?: string | null;
-    primaryEmailAddress?: { emailAddress: string } | null;
-    imageUrl?: string | null;
-    rol?: string | null;
-  };
-}) {
+export function NavUser() {
   const { isMobile } = useSidebar();
   const [openCorreoModal, setOpenCorreoModal] = useState(false);
 
-  const name = user.fullName || "";
-  const email = user.primaryEmailAddress?.emailAddress || "";
-  const avatar = user.imageUrl || "";
-  const rol = user.rol || "";
+  const name = useUserStore((state) => state.name);
+  const role = useUserStore((state) => state.role);
+  const imageUrl = useUserStore((state) => state.imageUrl);
+  const email = useUserStore((state) => state.email);
 
   const { signOut } = useClerk();
 
@@ -63,15 +55,15 @@ export function NavUser({
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <SidebarMenuButton
-                size="lg"
+                size="xl"
                 className="data-[state=open]:bg-sidebar-accent data-[state=open]:text-sidebar-accent-foreground"
               >
                 <Avatar className="h-8 w-8 rounded-lg">
-                  <AvatarImage src={avatar} alt={name} />
-                  {/* <AvatarFallback className="rounded-lg">CN</AvatarFallback> */}
+                  <AvatarImage src={imageUrl ?? undefined} alt={name ?? "Usuario"} />
                 </Avatar>
                 <div className="grid flex-1 text-left text-sm leading-tight">
-                  <span className="truncate font-medium">{name} - {rol}</span>
+                  <span className="truncate font-medium">{name}</span>
+                  <span className="truncate font-normal text-xs">{role === "admin" ? "Admin" : "Usuario"}</span>
                   <span className="truncate text-xs">{email}</span>
                 </div>
                 <ChevronsUpDown className="ml-auto size-4" />
@@ -86,11 +78,12 @@ export function NavUser({
               <DropdownMenuLabel className="p-0 font-normal">
                 <div className="flex items-center gap-2 px-1 py-1.5 text-left text-sm">
                   <Avatar className="h-8 w-8 rounded-lg">
-                    <AvatarImage src={avatar} alt={name} />
+                    <AvatarImage src={imageUrl ?? undefined} alt={name ?? "Usuario"} />
                     <AvatarFallback className="rounded-lg">CN</AvatarFallback>
                   </Avatar>
                   <div className="grid flex-1 text-left text-sm leading-tight">
                     <span className="truncate font-medium">{name}</span>
+                    <span className="truncate font-normal text-xs">{role === "admin" ? "Admin" : "Usuario"}</span>
                     <span className="truncate text-xs">{email}</span>
                   </div>
                 </div>

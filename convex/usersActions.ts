@@ -175,38 +175,38 @@ export const actualizarUsuarioConClerk = action({
       });
 
       // Verificar si el nuevo email ya existe en Clerk
-      if (args.nuevosDatosClerk.emailAddress !== usuarioActual.email) {
-        const existingUsers = await clerkClient.users.getUserList({
-          emailAddress: [args.nuevosDatosClerk.emailAddress],
-        });
-        if (
-          existingUsers.data.length > 0 &&
-          existingUsers.data[0].id !== args.clerkId
-        ) {
-          return {
-            success: false,
-            error: "Ya existe un usuario con ese correo en Clerk.",
-          };
-        }
-      }
+      // if (args.nuevosDatosClerk.emailAddress !== usuarioActual.email) {
+      //   const existingUsers = await clerkClient.users.getUserList({
+      //     emailAddress: [args.nuevosDatosClerk.emailAddress],
+      //   });
+      //   if (
+      //     existingUsers.data.length > 0 &&
+      //     existingUsers.data[0].id !== args.clerkId
+      //   ) {
+      //     return {
+      //       success: false,
+      //       error: "Ya existe un usuario con ese correo en Clerk.",
+      //     };
+      //   }
+      // }
 
       // Paso 4: Manejar cambio de email
-      const currentEmail = clerkUser.emailAddresses.find(
-        (e) => e.id === clerkUser.primaryEmailAddressId
-      );
+      // const currentEmail = clerkUser.emailAddresses.find(
+      //   (e) => e.id === clerkUser.primaryEmailAddressId
+      // );
 
-      if (currentEmail?.emailAddress !== args.nuevosDatosClerk.emailAddress) {
-        // Crear nuevo email
-        await clerkClient.emailAddresses.createEmailAddress({
-          userId: args.clerkId,
-          emailAddress: args.nuevosDatosClerk.emailAddress,
-        });
-      }
+      // if (currentEmail?.emailAddress !== args.nuevosDatosClerk.emailAddress) {
+      //   // Crear nuevo email
+      //   await clerkClient.emailAddresses.createEmailAddress({
+      //     userId: args.clerkId,
+      //     emailAddress: args.nuevosDatosClerk.emailAddress,
+      //   });
+      // }
 
       // Paso 5: Actualizar otros datos en Clerk
       await clerkClient.users.updateUser(args.clerkId, datosNuevosClerk);
 
-      return { success: true, message: "Se creó el nuevo correo. Por favor, verifica tu correo electrónico para confirmar el cambio." };
+      return { success: true, message: "Se realizarón los cambios exitosamente." };
     } catch (error) {
       // Rollback en caso de error
       try {
@@ -228,28 +228,6 @@ export const actualizarUsuarioConClerk = action({
       return {
         success: false,
         error: "Error al actualizar usuario: " + (error as Error).message,
-      };
-    }
-  },
-});
-
-export const actualizarPasswordUsuario = action({
-  args: v.object({
-    clerkId: v.string(),
-    nuevaPassword: v.string(),
-  }),
-  handler: async (_ctx, args) => {
-    try {
-      // Actualizar la contraseña del usuario en Clerk
-      await clerkClient.users.updateUser(args.clerkId, {
-        password: args.nuevaPassword,
-      });
-
-      return { success: true, message: "Contraseña actualizada correctamente." };
-    } catch (error) {
-      return {
-        success: false,
-        error: "Error al actualizar la contraseña: " + (error as Error).message,
       };
     }
   },

@@ -30,7 +30,7 @@ export default function AuthButtons() {
                 </div>
                 </Link>
             </Button>
-            <Button className='m-2'>
+            <Button className='m-2' disabled={true}>
                 <Link href="/sign-up">
                     <UserPlus/>
                 </Link>
