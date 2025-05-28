@@ -13,8 +13,11 @@ import { useForm } from "react-hook-form";
 import { z } from "zod";
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useState } from "react";
-import { useUser } from "@clerk/nextjs";
+import { useClerk, useUser } from "@clerk/nextjs";
 import { toast } from "sonner";
+import { api } from "@/convex/_generated/api";
+import { useMutation } from "convex/react";
+import { useUserStore } from "@/app/stores/usuarioStore";
 
 const schema = z.object({
   email: z.string().email("Correo inválido"),
@@ -33,6 +36,9 @@ export function CambiarCorreoModal({
   const [successStep1, setSuccessStep1] = useState(false);
   const [newEmailId, setNewEmailId] = useState<string | null>(null);
   const [errorMsg, setErrorMsg] = useState("");
+  const { signOut } = useClerk();
+  const cambiarCorreo = useMutation(api.usuarios.cambiarCorreo)
+  const email = useUserStore((state) => state.email);
 
   const {
     register,
@@ -71,17 +77,24 @@ export function CambiarCorreoModal({
 
         await user.update({ primaryEmailAddressId: emailToVerify.id });
 
-        // Opcional: eliminar correos antiguos
         for (const e of user.emailAddresses) {
           if (e.id !== emailToVerify.id) {
             await e.destroy();
           }
         }
 
-        toast.success("Correo cambiado exitosamente");
+        const result = await cambiarCorreo({ oldEmail: email ?? "", newEmail: data.email })
 
-        reset();
-        setOpen(false);
+        if (result.success) {
+          toast.success(result.message);
+          reset();
+          setOpen(false);
+          await signOut({ redirectUrl: '/' });
+        } else {
+          toast.error(result.message);
+        }
+
+
       }
     } catch (err) {
       toast.error("Ocurrio un error al cambiar el correo");
@@ -144,8 +157,8 @@ export function CambiarCorreoModal({
               {loading
                 ? "Procesando..."
                 : !successStep1
-                ? "Enviar código"
-                : "Verificar y guardar"}
+                  ? "Enviar código"
+                  : "Verificar y guardar"}
             </Button>
           </DialogFooter>
         </form>

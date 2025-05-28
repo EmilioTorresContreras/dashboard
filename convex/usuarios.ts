@@ -66,3 +66,27 @@ export const actualizarUsuario = mutation({
     await ctx.db.patch(args.usuarioId, args.nuevosDatos);
   },
 });
+
+export const cambiarCorreo = mutation({
+  args: {
+    oldEmail: v.string(),
+    newEmail: v.string(),
+  },
+  handler: async (ctx, args) => {
+    const users = await ctx.db.query("usuarios")
+      .filter(q => q.eq(q.field("email"), args.oldEmail))
+      .collect();
+
+    if (users.length === 0) {
+      return { success: false, message: "Usuario no encontrado con ese correo." };
+    }
+
+    const user = users[0];
+
+    await ctx.db.patch(user._id, {
+      email: args.newEmail,
+    });
+
+    return { success: true, message: "Correo actualizado correctamente." };
+  }
+});

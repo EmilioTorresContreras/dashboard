@@ -13,6 +13,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
+import { useClerk } from "@clerk/nextjs";
 
 const passwordSchema = z.object({
     password: z
@@ -34,6 +35,7 @@ export default function PasswordPage() {
     const searchParams = useSearchParams();
     const token = searchParams.get("token");
     const router = useRouter();
+    const { signOut } = useClerk();
 
     const [errorUsuario, setErrorUsuario] = useState<Error | null>(null);
     const [isSubmitting, setIsSubmitting] = useState(false);
@@ -57,7 +59,7 @@ export default function PasswordPage() {
                 });
                 if (result.success) {
                     toast.success(result.message);
-                    router.push("/");
+                    await signOut({ redirectUrl: '/' });
                 } else {
 
                     toast.error(result.error);

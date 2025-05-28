@@ -22,8 +22,6 @@ export default function UserCreateForm() {
       nombre: "",
       apellido: "",
       email: "",
-      password: "",
-      confirmPassword: "",
       rol: "usuario"
     }
   })
@@ -43,11 +41,13 @@ export default function UserCreateForm() {
   const onSubmit = async (data: UsuarioFormValues) => {
     try {
       setIsSubmitting(true);
+      const year = new Date().getFullYear()
+      const password = `${data.nombre.slice(0, 3)}${data.apellido.slice(0, 3)}Limon${year}`
       const result = await createUser({
         nombre: data.nombre,
         apellido: data.apellido,
         email: data.email,
-        password: data.password,
+        password: password,
         rol: data.rol,
         metadata: {}
       });
@@ -165,46 +165,11 @@ export default function UserCreateForm() {
                   )}
                 />
 
-                <FormField
-                  control={form.control}
-                  name="password"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Contraseña</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
-                <FormField
-                  control={form.control}
-                  name="confirmPassword"
-                  render={({ field }) => (
-                    <FormItem>
-                      <FormLabel>Confirmar Contraseña</FormLabel>
-                      <FormControl>
-                        <Input type="password" {...field} />
-                      </FormControl>
-                      <FormMessage />
-                    </FormItem>
-                  )}
-                />
               </div>
 
             </CardContent>
 
             <CardFooter className="flex flex-col sm:flex-row justify-between gap-4 mt-4">
-              {/* <Button
-                type="button"
-                variant="outline"
-                onClick={() => router.back()}
-                disabled={isSubmitting}
-                className="w-full sm:w-auto"
-              >
-                Cancelar
-              </Button> */}
               <Button
                 type="submit"
                 disabled={isSubmitting}
@@ -216,57 +181,6 @@ export default function UserCreateForm() {
           </form>
         </Form>
       </Card>
-      {/* <form onSubmit={handleSubmit(onSubmit)} className="max-w-md mx-auto space-y-6 p-4">
-        <div>
-          <Label htmlFor="nombre">Nombre</Label>
-          <Input id="nombre" placeholder="Juan" {...register("nombre")} />
-          {errors.nombre && <p className="text-red-600 mt-1 text-sm">{errors.nombre.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="apellido">Apellido</Label>
-          <Input id="apellido" placeholder="Pérez" {...register("apellido")} />
-          {errors.apellido && <p className="text-red-600 mt-1 text-sm">{errors.apellido.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="email">Email</Label>
-          <Input id="email" type="email" placeholder="correo@ejemplo.com" {...register("email")} />
-          {errors.email && <p className="text-red-600 mt-1 text-sm">{errors.email.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="password">Contraseña</Label>
-          <Input id="password" type="password" {...register("password")} />
-          {errors.password && <p className="text-red-600 mt-1 text-sm">{errors.password.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="confirmPassword">Confirmar Contraseña</Label>
-          <Input id="confirmPassword" type="password" {...register("confirmPassword")} />
-          {errors.confirmPassword && <p className="text-red-600 mt-1 text-sm">{errors.confirmPassword.message}</p>}
-        </div>
-
-        <div>
-          <Label htmlFor="rol">Rol</Label>
-          <Select defaultValue="usuario" {...register("rol")}>
-            <SelectTrigger id="rol">
-              <SelectValue placeholder="Selecciona un rol" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="admin">Admin</SelectItem>
-              <SelectItem value="usuario">Usuario</SelectItem>
-            </SelectContent>
-          </Select>
-          {errors.rol && <p className="text-red-600 mt-1 text-sm">{errors.rol.message}</p>}
-        </div>
-
-        <div className="pt-4">
-          <Button type="submit" disabled={isSubmitting} className="w-full">
-            {isSubmitting ? 'Creando...' : 'Crear Usuario'}
-          </Button>
-        </div>
-      </form> */}
     </div>
   );
 }

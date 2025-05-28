@@ -15,7 +15,7 @@ import { zodResolver } from "@hookform/resolvers/zod";
 import { toast } from "sonner";
 import { Id } from "@/convex/_generated/dataModel";
 import { useForm } from "react-hook-form";
-import { UsuarioFormEditValues, usuarioEditSchema } from "@/app/shemas/usuario";
+import { UsuarioFormValues, usuarioSchema } from "@/app/shemas/usuario";
 import { useUserStore } from "@/app/stores/usuarioStore";
 
 export default function EditarUsuarioPage({ params }: { params: Promise<{ id: string }> }) {
@@ -31,8 +31,8 @@ export default function EditarUsuarioPage({ params }: { params: Promise<{ id: st
     const [isSubmitting, setIsSubmitting] = useState(false);
     const setItems = useBreadcrumbStore(state => state.setItems);
 
-    const form = useForm<UsuarioFormEditValues>({
-        resolver: zodResolver(usuarioEditSchema),
+    const form = useForm<UsuarioFormValues>({
+        resolver: zodResolver(usuarioSchema),
         defaultValues: {
             nombre: "",
             apellido: "",
@@ -64,7 +64,7 @@ export default function EditarUsuarioPage({ params }: { params: Promise<{ id: st
         setIsLoadingUsuario(false);
     }, [usuario, form, setItems]);
 
-    const onSubmit = async (values: UsuarioFormEditValues) => {
+    const onSubmit = async (values: UsuarioFormValues) => {
         toast("Actualizando usuario...")
         try {
             setIsSubmitting(true);

@@ -21,19 +21,48 @@ export async function POST(req: Request) {
 
 
     const link = `${baseUrl}/password?token=${token}`;
+    const year = new Date().getFullYear()
+    const password = `${body.nombre.slice(0, 3)}${body.apellido.slice(0, 3)}Limon${year}`
 
     await resend.emails.send({
-      from: 'onboarding@resend.dev',
+      from: 'escuela.limon@emilio.korian-labs.net',
       to: body.email,
       subject: "Bienvenido a Nuestra Plataforma",
       html: `
-      <p>Hola ${body.nombre} ${body.apellido},</p>
-    <p>Haz clic en el siguiente botón para establecer una nueva contraseña:</p>
-    <a href="${link}" style="padding: 10px 20px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 5px;">
-      Cambiar contraseña
-    </a>
-    `,
+    <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #e5e7eb; border-radius: 8px; background-color: #f9fafb;">
+      <h2 style="color: #111827;">¡Bienvenido, ${body.nombre} ${body.apellido}!</h2>
+
+      <p style="color: #374151; font-size: 16px;">
+        Gracias por unirte a nuestra plataforma. Tu cuenta ha sido creada exitosamente.
+      </p>
+
+      <p style="color: #374151; font-size: 16px;">
+        <strong>Tu contraseña temporal es:</strong> <code style="background-color: #f3f4f6; padding: 4px 8px; border-radius: 4px;">${password}</code>
+      </p>
+
+      <p style="color: #374151; font-size: 16px;">
+        Para tu seguridad, te pedimos que cambies esta contraseña lo antes posible.
+      </p>
+
+      <div style="margin: 24px 0;">
+        <a href="${link}" style="display: inline-block; padding: 12px 24px; background-color: #4f46e5; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
+          Cambiar contraseña
+        </a>
+      </div>
+
+      <p style="font-size: 14px; color: #6b7280;">
+        Si tú no creaste esta cuenta, por favor ignora este correo.
+      </p>
+
+      <hr style="margin: 32px 0; border: none; border-top: 1px solid #e5e7eb;" />
+
+      <p style="font-size: 12px; color: #9ca3af; text-align: center;">
+        © ${new Date().getFullYear()} Escuela Limon. Todos los derechos reservados.
+      </p>
+    </div>
+  `,
     });
+
     return Response.json({ success: true });
   } catch (error) {
     return Response.json({ success: false, error: (error as Error).message });
