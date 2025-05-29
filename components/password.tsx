@@ -109,7 +109,7 @@ export default function PasswordPage() {
                                     name="password"
                                     render={({ field }) => (
                                         <FormItem>
-                                            <FormLabel>Contraseña</FormLabel>
+                                            <FormLabel>Nueva Contraseña</FormLabel>
                                             <FormControl>
                                                 <Input type="password" {...field} />
                                             </FormControl>

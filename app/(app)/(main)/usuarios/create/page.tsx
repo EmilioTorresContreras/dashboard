@@ -41,13 +41,20 @@ export default function UserCreateForm() {
   const onSubmit = async (data: UsuarioFormValues) => {
     try {
       setIsSubmitting(true);
+      const charset = "abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789!@#$%^&*()_+-=[]{}|;:,.<>?";
+      let password = "";
+      for (let i = 0, n = charset.length; i < 6; ++i) {
+        password += charset.charAt(Math.floor(Math.random() * n));
+      }
       const year = new Date().getFullYear()
-      const password = `${data.nombre.slice(0, 3)}${data.apellido.slice(0, 3)}Limon${year}`
+      const random = Math.floor(Math.random() * 1000)
+      const passwordComplet = `${data.nombre.slice(0, 3)}${data.apellido.slice(0, 3)}Limon${year}${random}${password}`
+
       const result = await createUser({
         nombre: data.nombre,
         apellido: data.apellido,
         email: data.email,
-        password: password,
+        password: passwordComplet,
         rol: data.rol,
         metadata: {}
       });
@@ -61,18 +68,19 @@ export default function UserCreateForm() {
               apellido: data.apellido,
               email: data.email,
               rol: data.rol,
+              password: passwordComplet,
               id: result.userId
             }),
           });
           toast.success("Correo enviado exitosamente");
         } catch (emailError) {
+          toast.error("Ocurrió un error al enviar el correo");
           console.error("Error al enviar el correo:", emailError);
         }
       } else {
         toast.error(result.error);
       }
     } catch (err) {
-      console.error(err);
       toast.error(err instanceof Error ? err.message : "Error al crear usuario");
     } finally {
       setIsSubmitting(false);
