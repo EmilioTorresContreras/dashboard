@@ -17,7 +17,7 @@ export function ProviderSignInUp({ children }: { children: ReactNode }) {
         <ClerkProvider
           localization={esMX}
           appearance={{
-            baseTheme: theme === "dark" ? [dark] : [],
+            baseTheme: theme === "dark" ? [dark] : theme === "system" ? [dark] : [],
             layout: {
               socialButtonsPlacement: 'bottom',
               logoPlacement: 'inside',
